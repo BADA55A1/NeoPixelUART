@@ -10,7 +10,7 @@ OBJ_DIR    = $(BIN_DIR)/obj
 CXX        = g++
 OPT_FLAGS  =
 CXXFLAGS   = -c $(OPT_FLAGS)
-LDFLAGS    = -lfftw3 -lm -lpulse-simple
+LDFLAGS    = -pthread -lfftw3 -lm -lpulse-simple
 
 DEBUG ?= 0
 ifeq ($(DEBUG), 1)
@@ -24,6 +24,9 @@ OBJECTS    := $(addprefix $(OBJ_DIR)/,$(OBJECTS))
 
 
 all: $(NAME)
+
+run:
+	./$(NAME)
 
 $(NAME): $(OBJECTS)
 	$(CXX) $(LDFLAGS) $(OBJECTS) -o $@

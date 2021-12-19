@@ -1,5 +1,57 @@
-#include <stdio.h>
+#include <iostream>
+#include <vector>
+#include <thread>
+#include "ThreadHelpers.h"
+#include <unistd.h>
 
-int main(void) {
+class Transmitter
+{
+public:
+	OneDirectionData<std::vector<unsigned>> * data_out;
+
+	void send_in_loop()
+	{
+		for(;;)
+		{
+			std::vector<unsigned> tmp_data(1000000);
+			std::cout << "Transmitter sending data...\n";
+			data_out->set(tmp_data);
+			usleep(50000);
+		}
+	}
+};
+
+class Receiver
+{
+public:
+	OneDirectionData<std::vector<unsigned>> * data_in;
+
+	void get_in_loop()
+	{
+		for(;;)
+		{
+			auto tmp_data = data_in->get();
+			std::cout << "Receiver got data.\n";
+			usleep(100000);
+		}
+	}
+};
+
+
+
+int main()
+{
+
+	OneDirectionData<std::vector<unsigned>> data;
+	Transmitter trans;
+	Receiver reciv;
+	trans.data_out = &data;
+	reciv.data_in = &data;
+
+	std::thread tr_t(&Transmitter::send_in_loop, trans);
+	std::thread re_t(&Receiver::get_in_loop, reciv);
+	tr_t.join();
+	re_t.join();
+
 	return 0;
 }
