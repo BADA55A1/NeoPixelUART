@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <thread>
 
@@ -7,53 +8,18 @@
 
 #include <unistd.h>
 
-class Transmitter
-{
-public:
-	OneDirectionDataBuffer<RawAudioData> * data_out;
-
-	void send_in_loop()
-	{
-		for(;;)
-		{
-			RawAudioData tmp_data(1000000);
-			std::cout << "Transmitter sending data...\n";
-			data_out->set(tmp_data);
-			usleep(50000);
-		}
-	}
-};
-
-class Receiver
-{
-public:
-	OneDirectionDataBuffer<RawAudioData> * data_in;
-
-	void get_in_loop()
-	{
-		for(;;)
-		{
-			auto tmp_data = data_in->get();
-			std::cout << "Receiver got data.\n";
-			usleep(100000);
-		}
-	}
-};
-
-
 
 int main()
 {
-	// std::shared_ptr<OneDirectionDataBuffer<std::vector<unsigned>>> p = std::make_shared<Derived>();
+	std::shared_ptr<OneDirectionDataBuffer<RawAudioData>> raw_audio = std::make_shared<OneDirectionDataBuffer<RawAudioData>>();
 
-	OneDirectionDataBuffer<RawAudioData> data;
-	Transmitter trans;
-	Receiver reciv;
-	trans.data_out = &data;
-	reciv.data_in = &data;
+	std::shared_ptr<OneDirectionDataBuffer<std::vector<double>>> real_audio = std::make_shared<OneDirectionDataBuffer<std::vector<double>>>();
 
-	std::thread tr_t(&Transmitter::send_in_loop, trans);
-	std::thread re_t(&Receiver::get_in_loop, reciv);
+	PulseAudioRead trans(raw_audio, 1050);
+	RawDataToDouble raw_to_double(raw_audio, real_audio);
+
+	std::thread tr_t(&PulseAudioRead::execute_loop, trans);
+	std::thread re_t(&RawDataToDouble::execute_loop, raw_to_double);
 	tr_t.join();
 	re_t.join();
 
