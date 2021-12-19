@@ -5,6 +5,14 @@
 #include <cstdint>
 #include "ThreadHelpers.h"
 
+class ColorRGB
+{
+	double r, g, b;
+public:
+	ColorRGB(double r = 0, double g = 0, double b = 0) : r(r), g(g), b(b) {}
+	uint32_t toHEX() const;
+};
+
 class Serial
 {
 	int out;
@@ -28,7 +36,10 @@ public:
 	);
 	//~AdressingLEDstrip();
 
-	void setLEDs(const std::vector<uint32_t> &led_colors_hex);
+	// uint32_t rgb2hex(const double r, const double g, const double b);
+	// uint32_t hsv2hex(const double r, const double g, const double b);
+	void setLEDsHEX(const std::vector<uint32_t> &led_colors_hex);
+	void setLEDs(const std::vector<ColorRGB> &led_colors);
 };
 
 

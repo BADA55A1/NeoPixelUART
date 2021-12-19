@@ -7,6 +7,7 @@
 #include <asm/termbits.h>
 #include <unistd.h>
 #include <fcntl.h>
+// #include <math.h>
 
 
 static const uint8_t led_bit_triplets_lookup_table[8] = {0x5b, 0x1b, 0x53, 0x13, 0x5a, 0x1a, 0x52, 0x12};
@@ -70,7 +71,7 @@ std::vector<uint8_t> AdressingLEDstrip::encode(const uint32_t color_hex)
 	return out;
 }
 
-void AdressingLEDstrip::setLEDs(const std::vector<uint32_t> &led_colors_hex)
+void AdressingLEDstrip::setLEDsHEX(const std::vector<uint32_t> &led_colors_hex)
 {
 	std::vector<uint8_t> led_data;
 	static std::vector<uint8_t> encoded_color;
@@ -81,3 +82,23 @@ void AdressingLEDstrip::setLEDs(const std::vector<uint32_t> &led_colors_hex)
 	}
 	out.write(led_data.data(), led_data.size() );
 }
+
+void AdressingLEDstrip::setLEDs(const std::vector<ColorRGB> &led_colors)
+{
+	std::vector<uint32_t> hex_colors;
+	for(auto led_color: led_colors)
+	{
+		hex_colors.push_back(led_color.toHEX() );
+	}
+	setLEDsHEX(hex_colors);
+}
+
+uint32_t ColorRGB::toHEX() const
+{
+	return (uint32_t(r * 255.0) << 16) + (uint32_t(g * 255.0) << 8) + uint32_t(b * 255.0);
+}
+
+// uint32_t AdressingLEDstrip::hsv2hex(const double h, const double s, const double v)
+// {
+// 	return
+// }
