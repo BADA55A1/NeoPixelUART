@@ -4,6 +4,7 @@
 #include <thread>
 
 #include "PulseAudioRead.h"
+#include "DFT.h"
 #include "ThreadHelpers.h"
 
 #include <unistd.h>
@@ -11,17 +12,26 @@
 
 int main()
 {
-	std::shared_ptr<OneDirectionDataBuffer<RawAudioData>> raw_audio = std::make_shared<OneDirectionDataBuffer<RawAudioData>>();
+	// Setup buffers
+	std::shared_ptr<OneDirectionDataBuffer<DataArray<uint8_t>>> raw_audio = std::make_shared<OneDirectionDataBuffer<DataArray<uint8_t>>>();
 
-	std::shared_ptr<OneDirectionDataBuffer<std::vector<double>>> real_audio = std::make_shared<OneDirectionDataBuffer<std::vector<double>>>();
+	std::shared_ptr<OneDirectionDataBuffer<DataArray<double>>> real_audio = std::make_shared<OneDirectionDataBuffer<DataArray<double>>>();
 
-	PulseAudioRead trans(raw_audio, 1050);
-	RawDataToDouble raw_to_double(raw_audio, real_audio);
+	std::shared_ptr<OneDirectionDataBuffer<DataArray<double>>> fft = std::make_shared<OneDirectionDataBuffer<DataArray<double>>>();
 
-	std::thread tr_t(&PulseAudioRead::execute_loop, trans);
-	std::thread re_t(&RawDataToDouble::execute_loop, raw_to_double);
-	tr_t.join();
-	re_t.join();
+	// Setup modules
+	PulseAudioModule module_pa(raw_audio, 1050);
+	RawToDoubleModule module_to_double(raw_audio, real_audio);
+	DFT module_dft(real_audio, fft);
+
+	// Start modules
+	std::thread module_pa_t(&PulseAudioModule::execute_loop, module_pa);
+	std::thread module_to_double_t(&RawToDoubleModule::execute_loop, module_to_double);
+	std::thread module_dft_t(&DFT::execute_loop, module_dft);
+
+	module_pa_t.join();
+	module_to_double_t.join();
+	module_dft_t.join();
 
 	return 0;
 }

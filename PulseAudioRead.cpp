@@ -1,31 +1,9 @@
 #include "PulseAudioRead.h"
 #include <cstring>
 
-RawAudioData::RawAudioData()
-{
-	this->data_len = 0;
-	data = nullptr;
-}
 
-RawAudioData::RawAudioData(unsigned data_len)
-{
-	this->data_len = data_len;
-	data = new uint8_t[data_len];
-}
-
-RawAudioData::RawAudioData(const RawAudioData &in) : RawAudioData(in.dataLength())
-{
-	memcpy(this->data, in.data, data_len*sizeof(uint8_t));
-}
-
-RawAudioData::~RawAudioData()
-{
-	delete[] data;
-}
-
-
-PulseAudioRead::PulseAudioRead(
-	const std::shared_ptr<OneDirectionDataBuffer<RawAudioData>> out_buffer,
+PulseAudioModule::PulseAudioModule(
+	const std::shared_ptr<OneDirectionDataBuffer<DataArray<uint8_t>>> out_buffer,
 	const unsigned buffer_length,
 	const std::string app_name,
 	const std::string stream_desc
@@ -54,14 +32,14 @@ PulseAudioRead::PulseAudioRead(
 
 }
 
-PulseAudioRead::~PulseAudioRead()
+PulseAudioModule::~PulseAudioModule()
 {
 	if(pa_stream)	pa_simple_free(pa_stream);
 }
 
-void PulseAudioRead::execute_loop()
+void PulseAudioModule::execute_loop()
 {
-	RawAudioData tmp_buffer(buffer_length);
+	DataArray<uint8_t> tmp_buffer(buffer_length);
 	while(true)
 	{
 		pa_simple_read(
@@ -74,23 +52,23 @@ void PulseAudioRead::execute_loop()
 	}
 }
 
-RawDataToDouble::RawDataToDouble(
-	const std::shared_ptr<OneDirectionDataBuffer<RawAudioData>> in_buffer,
-	const std::shared_ptr<OneDirectionDataBuffer<std::vector<double>>> out_buffer
+RawToDoubleModule::RawToDoubleModule(
+	const std::shared_ptr<OneDirectionDataBuffer<DataArray<uint8_t>>> in_buffer,
+	const std::shared_ptr<OneDirectionDataBuffer<DataArray<double>>> out_buffer
 ) : in_buffer(in_buffer), out_buffer(out_buffer) {}
 
-void RawDataToDouble::execute_loop()
+void RawToDoubleModule::execute_loop()
 {
-	RawAudioData tmp_in_buffer = in_buffer->get();
-	const unsigned out_vector_size = tmp_in_buffer.dataLength() / 2;
-	std::vector<double> tmp_out_buffer(out_vector_size);
+	DataArray<uint8_t> tmp_in_buffer = in_buffer->get();
+	const unsigned out_vector_size = tmp_in_buffer.size() / 2;
+	DataArray<double> tmp_out_buffer(out_vector_size);
 
 	while(true)
 	{
-		tmp_in_buffer = in_buffer->get();
+		tmp_in_buffer.update(in_buffer->get() );
 		for(unsigned sample = 0; sample < out_vector_size; sample++)
 		{
-			tmp_out_buffer[sample] = (
+			tmp_out_buffer.data[sample] = (
 				double(tmp_in_buffer.data[sample * 2]) + 
 				double(int8_t(tmp_in_buffer.data[sample * 2 + 1]) << 8)
 			) / 65536.0;

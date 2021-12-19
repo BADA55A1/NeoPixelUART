@@ -4,8 +4,47 @@
 #include <iostream>
 #include <mutex>
 #include <condition_variable>
+#include <cstring>
 // #include <unistd.h>
 
+
+template <class T>
+class DataArray
+{
+	unsigned data_len;
+public:
+	T *data;
+
+	DataArray()
+	{
+		this->data_len = 0;
+		data = nullptr;
+	}
+	DataArray(unsigned data_len)
+	{
+		this->data_len = data_len;
+		data = new T[data_len];
+	}
+	DataArray(const DataArray<T> &in) : DataArray(in.size())
+	{
+		memcpy(this->data, in.data, data_len*sizeof(T));
+	}
+	// DataArray(const DataArray<T> &in)
+	// {
+	// 	memcpy(this->data, in.data, data_len*sizeof(T));
+	// }
+	~DataArray()
+	{
+		delete[] data;
+	}
+
+	void update(const DataArray<T> &in)
+	{
+		memcpy(this->data, in.data, data_len*sizeof(T));
+	}
+
+	unsigned size() const { return data_len; }
+};
 
 template <class T>
 class OneDirectionDataBuffer
