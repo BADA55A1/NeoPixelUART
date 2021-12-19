@@ -3,6 +3,7 @@
 #include <vector>
 #include <thread>
 
+#include "NeoPixelUART.h"
 #include "PulseAudioRead.h"
 #include "DFT.h"
 #include "ThreadHelpers.h"
@@ -12,6 +13,20 @@
 
 int main()
 {
+	AdressingLEDstrip strip("/dev/ttyUSB0", 2400000);
+	strip.setLEDs({
+		0xFF0000,
+		0x0000FF,
+		0x00FF00,
+		0xFF0000,
+		0x00FFFF,
+		0x777777,
+		0x000000,
+		0x00FFFF,
+		0x100010,
+	});
+
+
 	// Setup buffers
 	std::shared_ptr<OneDirectionDataBuffer<DataArray<uint8_t>>> raw_audio = std::make_shared<OneDirectionDataBuffer<DataArray<uint8_t>>>();
 

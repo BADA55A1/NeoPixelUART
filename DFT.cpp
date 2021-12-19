@@ -2,7 +2,6 @@
 #include <fftw3.h>
 #include <math.h>
 
-#include <iostream>
 
 DFT::DFT(
 	const std::shared_ptr<OneDirectionDataBuffer<DataArray<double>>> in_buffer,
@@ -31,7 +30,6 @@ void DFT::execute_loop()
 			fft_out.data[n] = sqrt(fft_out_c[n][0] * fft_out_c[n][0] + fft_out_c[n][1] * fft_out_c[n][1]);
 		}
 
-		std::cout << fft_out.data[fft_size - 1] << "\n";
 		out_buffer->set(fft_out);
 	}
 }

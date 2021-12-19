@@ -17,8 +17,8 @@ ifeq ($(DEBUG), 1)
 	CXXFLAGS += -DDEBUG
 endif
 
-DEPS       = ThreadHelpers.h PulseAudioRead.h DFT.h
-SRCS       = main.cpp ThreadHelpers.cpp PulseAudioRead.cpp DFT.cpp
+DEPS       = NeoPixelUART.h ThreadHelpers.h PulseAudioRead.h DFT.h
+SRCS       = main.cpp NeoPixelUART.cpp ThreadHelpers.cpp PulseAudioRead.cpp DFT.cpp
 OBJECTS    = $(SRCS:.cpp=.o)
 OBJECTS    := $(addprefix $(OBJ_DIR)/,$(OBJECTS))
 
