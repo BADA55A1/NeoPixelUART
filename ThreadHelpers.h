@@ -8,7 +8,7 @@
 
 
 template <class T>
-class OneDirectionData
+class OneDirectionDataBuffer
 {
 private:
 	T data;
@@ -42,8 +42,6 @@ public:
 
 	T get()
 	{
-		T out;
-
 		// Wait for "new data available" flag to be set
 		std::unique_lock lock(new_data_mutex);
 		new_data_cond_var.wait(lock, [this]() { return new_data_flag; });
@@ -52,7 +50,7 @@ public:
 		out_read.lock();
 
 		// Read new data
-		out = data;
+		T out = data;
 
 		// Unset "new data available" flag
 		new_data_flag = false;

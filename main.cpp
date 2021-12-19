@@ -1,19 +1,22 @@
 #include <iostream>
 #include <vector>
 #include <thread>
+
+#include "PulseAudioRead.h"
 #include "ThreadHelpers.h"
+
 #include <unistd.h>
 
 class Transmitter
 {
 public:
-	OneDirectionData<std::vector<unsigned>> * data_out;
+	OneDirectionDataBuffer<RawAudioData> * data_out;
 
 	void send_in_loop()
 	{
 		for(;;)
 		{
-			std::vector<unsigned> tmp_data(1000000);
+			RawAudioData tmp_data(1000000);
 			std::cout << "Transmitter sending data...\n";
 			data_out->set(tmp_data);
 			usleep(50000);
@@ -24,7 +27,7 @@ public:
 class Receiver
 {
 public:
-	OneDirectionData<std::vector<unsigned>> * data_in;
+	OneDirectionDataBuffer<RawAudioData> * data_in;
 
 	void get_in_loop()
 	{
@@ -41,8 +44,9 @@ public:
 
 int main()
 {
+	// std::shared_ptr<OneDirectionDataBuffer<std::vector<unsigned>>> p = std::make_shared<Derived>();
 
-	OneDirectionData<std::vector<unsigned>> data;
+	OneDirectionDataBuffer<RawAudioData> data;
 	Transmitter trans;
 	Receiver reciv;
 	trans.data_out = &data;

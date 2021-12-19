@@ -17,8 +17,8 @@ ifeq ($(DEBUG), 1)
 	CXXFLAGS += -DDEBUG
 endif
 
-DEPS       = ThreadHelpers.h
-SRCS       = main.cpp ThreadHelpers.cpp
+DEPS       = ThreadHelpers.h PulseAudioRead.h
+SRCS       = main.cpp ThreadHelpers.cpp PulseAudioRead.cpp
 OBJECTS    = $(SRCS:.cpp=.o)
 OBJECTS    := $(addprefix $(OBJ_DIR)/,$(OBJECTS))
 
