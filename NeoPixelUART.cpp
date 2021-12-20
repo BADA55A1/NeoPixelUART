@@ -108,6 +108,14 @@ uint32_t ColorRGB::toHEX() const
 	return (uint32_t(r * 255.0) << 16) + (uint32_t(g * 255.0) << 8) + uint32_t(b * 255.0);
 }
 
+ColorRGB ColorRGB::operator+=(const ColorRGB &rhs)
+{
+   r += rhs.r;
+   g += rhs.g;
+   b += rhs.b;
+   return *this;
+}
+
 // uint32_t NeoPixelUART::hsv2hex(const double h, const double s, const double v)
 // {
 // 	return

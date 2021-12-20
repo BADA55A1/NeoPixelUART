@@ -30,7 +30,7 @@ int main()
 	std::shared_ptr<OneDirectionDataBuffer<DataArray<ColorRGB>>> colors = std::make_shared<OneDirectionDataBuffer<DataArray<ColorRGB>>>();
 
 	// Setup modules
-	PulseAudioModule module_pa(raw_audio, 1050);
+	PulseAudioModule module_pa(raw_audio, 2048);
 	RawToDoubleModule module_to_double(raw_audio, real_audio);
 	DFTModule module_dft(real_audio, fft);
 	VisualsModule module_visuals(fft, colors);

@@ -10,6 +10,7 @@ class ColorRGB
 	double r, g, b;
 public:
 	ColorRGB(double r = 0, double g = 0, double b = 0) : r(r), g(g), b(b) {}
+	ColorRGB operator+=(const ColorRGB &rhs);
 	uint32_t toHEX() const;
 };
 
