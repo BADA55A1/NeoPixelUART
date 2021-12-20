@@ -4,12 +4,12 @@
 #include <vector>
 #include "ThreadHelpers.h"
 
-class DFT
+class DFTModule
 {
 	std::shared_ptr<OneDirectionDataBuffer<DataArray<double>>> in_buffer;
 	std::shared_ptr<OneDirectionDataBuffer<DataArray<double>>> out_buffer;
 public:
-	DFT(
+	DFTModule(
 		const std::shared_ptr<OneDirectionDataBuffer<DataArray<double>>> in_buffer,
 		const std::shared_ptr<OneDirectionDataBuffer<DataArray<double>>> out_buffer
 	);

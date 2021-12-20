@@ -3,12 +3,12 @@
 #include <math.h>
 
 
-DFT::DFT(
+DFTModule::DFTModule(
 	const std::shared_ptr<OneDirectionDataBuffer<DataArray<double>>> in_buffer,
 	const std::shared_ptr<OneDirectionDataBuffer<DataArray<double>>> out_buffer
 ) : in_buffer(in_buffer), out_buffer(out_buffer) {}
 
-void DFT::execute_loop()
+void DFTModule::execute_loop()
 {
 	DataArray<double> signal_in = in_buffer->get();
 	const unsigned fft_size = signal_in.size() / 2;

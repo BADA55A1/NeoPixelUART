@@ -53,13 +53,13 @@ void Serial::write(const uint8_t *data, const unsigned size)
 	::write(out, data, size);
 }
 
-AdressingLEDstrip::AdressingLEDstrip(const std::string portname, const unsigned baud_rate)
+NeoPixelUART::NeoPixelUART(const std::string portname, const unsigned baud_rate)
 : out(portname, baud_rate)
 {
 
 }
 
-std::vector<uint8_t> AdressingLEDstrip::encode(const uint32_t color_hex)
+std::vector<uint8_t> NeoPixelUART::encode(const uint32_t color_hex)
 {
 	std::vector<uint8_t> out;
 	for(int8_t b = 7; b >= 0; b--)
@@ -71,7 +71,7 @@ std::vector<uint8_t> AdressingLEDstrip::encode(const uint32_t color_hex)
 	return out;
 }
 
-void AdressingLEDstrip::setLEDsHEX(const std::vector<uint32_t> &led_colors_hex)
+void NeoPixelUART::setLEDsHEX(const std::vector<uint32_t> &led_colors_hex)
 {
 	std::vector<uint8_t> led_data;
 	static std::vector<uint8_t> encoded_color;
@@ -83,7 +83,7 @@ void AdressingLEDstrip::setLEDsHEX(const std::vector<uint32_t> &led_colors_hex)
 	out.write(led_data.data(), led_data.size() );
 }
 
-void AdressingLEDstrip::setLEDs(const std::vector<ColorRGB> &led_colors)
+void NeoPixelUART::setLEDs(const std::vector<ColorRGB> &led_colors)
 {
 	std::vector<uint32_t> hex_colors;
 	for(auto led_color: led_colors)
@@ -93,12 +93,38 @@ void AdressingLEDstrip::setLEDs(const std::vector<ColorRGB> &led_colors)
 	setLEDsHEX(hex_colors);
 }
 
+void NeoPixelUART::setLEDs(const DataArray<ColorRGB> &led_colors)
+{
+	std::vector<uint32_t> hex_colors;
+	for(unsigned c = 0; c < led_colors.size(); c++)
+	{
+		hex_colors.push_back(led_colors.data[c].toHEX() );
+	}
+	setLEDsHEX(hex_colors);
+}
+
 uint32_t ColorRGB::toHEX() const
 {
 	return (uint32_t(r * 255.0) << 16) + (uint32_t(g * 255.0) << 8) + uint32_t(b * 255.0);
 }
 
-// uint32_t AdressingLEDstrip::hsv2hex(const double h, const double s, const double v)
+// uint32_t NeoPixelUART::hsv2hex(const double h, const double s, const double v)
 // {
 // 	return
 // }
+
+
+NeoPixelModule::NeoPixelModule(
+	const std::shared_ptr<NeoPixelUART> led_strip,
+	const std::shared_ptr<OneDirectionDataBuffer<DataArray<ColorRGB>>> in_buffer
+) : led_strip(led_strip), in_buffer(in_buffer) {}
+
+void NeoPixelModule::execute_loop()
+{
+	DataArray<ColorRGB> colors_in = in_buffer->get();
+	while(true)
+	{
+		colors_in.update(in_buffer->get() );
+		led_strip->setLEDs(colors_in);
+	}
+}

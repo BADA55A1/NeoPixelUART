@@ -24,22 +24,36 @@ public:
 };
 
 
-class AdressingLEDstrip
+class NeoPixelUART
 {
 	Serial out;
 
 	std::vector<uint8_t> encode(const uint32_t color_hex);
 public:
-	AdressingLEDstrip(
+	NeoPixelUART(
 		const std::string portname = "/dev/ttyUSB0",
 		const unsigned baud_rate = 2400000
 	);
-	//~AdressingLEDstrip();
+	//~NeoPixelUART();
 
 	// uint32_t rgb2hex(const double r, const double g, const double b);
 	// uint32_t hsv2hex(const double r, const double g, const double b);
 	void setLEDsHEX(const std::vector<uint32_t> &led_colors_hex);
 	void setLEDs(const std::vector<ColorRGB> &led_colors);
+	void setLEDs(const DataArray<ColorRGB> &led_colors);
+};
+
+class NeoPixelModule
+{
+	std::shared_ptr<NeoPixelUART> led_strip;
+	std::shared_ptr<OneDirectionDataBuffer<DataArray<ColorRGB>>> in_buffer;
+public:
+	NeoPixelModule(
+		const std::shared_ptr<NeoPixelUART> led_strip,
+		const std::shared_ptr<OneDirectionDataBuffer<DataArray<ColorRGB>>> in_buffer
+	);
+
+	void execute_loop();
 };
 
 

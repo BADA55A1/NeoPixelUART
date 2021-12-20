@@ -7,24 +7,17 @@
 #include "PulseAudioRead.h"
 #include "DFT.h"
 #include "ThreadHelpers.h"
+#include "Visuals.h"
 
 #include <unistd.h>
 
 
 int main()
 {
-	AdressingLEDstrip strip("/dev/ttyUSB0", 2400000);
-	strip.setLEDs({
-		0xFF0000,
-		0x0000FF,
-		0x00FF00,
-		0xFF0000,
-		0x00FFFF,
-		0x777777,
-		0x000000,
-		0x00FFFF,
-		0x100010,
-	});
+	std::shared_ptr<NeoPixelUART> led_strip = std::make_shared<NeoPixelUART>("/dev/ttyUSB0", 2400000);
+
+	std::vector<ColorRGB> black_col(40);
+	led_strip->setLEDs(black_col);
 
 
 	// Setup buffers
@@ -34,19 +27,27 @@ int main()
 
 	std::shared_ptr<OneDirectionDataBuffer<DataArray<double>>> fft = std::make_shared<OneDirectionDataBuffer<DataArray<double>>>();
 
+	std::shared_ptr<OneDirectionDataBuffer<DataArray<ColorRGB>>> colors = std::make_shared<OneDirectionDataBuffer<DataArray<ColorRGB>>>();
+
 	// Setup modules
 	PulseAudioModule module_pa(raw_audio, 1050);
 	RawToDoubleModule module_to_double(raw_audio, real_audio);
-	DFT module_dft(real_audio, fft);
+	DFTModule module_dft(real_audio, fft);
+	VisualsModule module_visuals(fft, colors);
+	NeoPixelModule module_leds(led_strip, colors);
 
 	// Start modules
 	std::thread module_pa_t(&PulseAudioModule::execute_loop, module_pa);
 	std::thread module_to_double_t(&RawToDoubleModule::execute_loop, module_to_double);
-	std::thread module_dft_t(&DFT::execute_loop, module_dft);
+	std::thread module_dft_t(&DFTModule::execute_loop, module_dft);
+	std::thread module_visuals_t(&VisualsModule::execute_loop, module_visuals);
+	std::thread module_leds_t(&NeoPixelModule::execute_loop, module_leds);
 
 	module_pa_t.join();
 	module_to_double_t.join();
 	module_dft_t.join();
+	module_visuals_t.join();
+	module_leds_t.join();
 
 	return 0;
 }
